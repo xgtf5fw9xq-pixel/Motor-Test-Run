@@ -9,6 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -29,10 +30,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  SparkMax Motor1 = new SparkMax(3, MotorType.kBrushless);
-  SparkMax Motor2 = new SparkMax(1, MotorType.kBrushless);
-  SparkMax Motor3 = new SparkMax(5, MotorType.kBrushless);
-  SparkMax Motor4 = new SparkMax(20, MotorType.kBrushless);
+  TalonFX Motor1 = new TalonFX(1);
+  TalonFX Motor2 = new TalonFX(2);
+  TalonFX Motor3 = new TalonFX(3);
+  TalonFX Motor4 = new TalonFX(4);
   double speed1;
   double speed2;
   double speed3;
