@@ -12,6 +12,7 @@ import frc.robot.subsystems.ExampleSubsystem;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -30,9 +31,12 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   SparkMax Motor1 = new SparkMax(3, MotorType.kBrushless);
   SparkMax Motor2 = new SparkMax(1, MotorType.kBrushless);
-  SparkMax Motor3 = new SparkMax(20, MotorType.kBrushless);
-  SparkMax Motor4 = new SparkMax(5, MotorType.kBrushless);
-
+  SparkMax Motor3 = new SparkMax(5, MotorType.kBrushless);
+  SparkMax Motor4 = new SparkMax(20, MotorType.kBrushless);
+  double speed1;
+  double speed2;
+  double speed3;
+  double speed4;
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -40,6 +44,10 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
+    SmartDashboard.putNumber("Motor 1 Speed", speed1);
+    SmartDashboard.putNumber("Motor 2 Speed", speed2);
+    SmartDashboard.putNumber("Motor 3 Speed", speed3);
+    SmartDashboard.putNumber("Motor 4 Speed", speed4);
     configureBindings();
   }
 
@@ -56,10 +64,10 @@ public class RobotContainer {
 
     m_driverController.x().whileTrue(
       new ParallelCommandGroup(
-        new RunCommand(() -> Motor1.set(1.)),
-        new RunCommand(() -> Motor2.set(1.)),
-        new RunCommand(() -> Motor3.set(1.)),
-        new RunCommand(() -> Motor4.set(1.))
+        new RunCommand(() -> Motor1.set(SmartDashboard.getNumber("Motor 1 Speed", 0.))),
+        new RunCommand(() -> Motor2.set(SmartDashboard.getNumber("Motor 2 Speed", 0))),
+        new RunCommand(() -> Motor3.set(SmartDashboard.getNumber("Motor 3 Speed", 0))),
+        new RunCommand(() -> Motor4.set(SmartDashboard.getNumber("Motor 4 Speed", 0)))
       )
     );
     m_driverController.x().whileFalse(
