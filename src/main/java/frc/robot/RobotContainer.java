@@ -5,16 +5,20 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.FlywheelSubsystem;
+import frc.robot.subsystems.Intake;
 
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.BangBangController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -29,26 +33,21 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  TalonFX Motor1 = new TalonFX(1);
-  TalonFX Motor2 = new TalonFX(2);
-  TalonFX Motor3 = new TalonFX(3);
-  TalonFX Motor4 = new TalonFX(4);
-  double speed1;
-  double speed2;
-  double speed3;
-  double speed4;
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final FlywheelSubsystem m_exampleSubsystem = new FlywheelSubsystem(31,32,33,34);
+  private final CommandXboxController m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final Intake m_intake = new Intake(35, 36, 37);
+  PIDController controller = new PIDController(4374, 4860, 5400);
+  PIDController controller2 = new PIDController(6000, 0, 0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    SmartDashboard.putNumber("Motor 1 Speed", speed1);
-    SmartDashboard.putNumber("Motor 2 Speed", speed2);
-    SmartDashboard.putNumber("Motor 3 Speed", speed3);
-    SmartDashboard.putNumber("Motor 4 Speed", speed4);
+    SmartDashboard.putNumber("Motor 1 RPM", 0);
+    SmartDashboard.putNumber("Motor 2 RPM", 0);
+    SmartDashboard.putNumber("Motor 3 RPM", 0);
+    SmartDashboard.putNumber("Motor 4 RPM", 0);
+    SmartDashboard.putData(controller);
+    SmartDashboard.putData(controller2);
     configureBindings();
   }
 
@@ -62,22 +61,27 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-
-    m_driverController.x().whileTrue(
-      new ParallelCommandGroup(
-        new RunCommand(() -> Motor1.set(SmartDashboard.getNumber("Motor 1 Speed", 0.))),
-        new RunCommand(() -> Motor2.set(SmartDashboard.getNumber("Motor 2 Speed", 0))),
-        new RunCommand(() -> Motor3.set(SmartDashboard.getNumber("Motor 3 Speed", 0))),
-        new RunCommand(() -> Motor4.set(SmartDashboard.getNumber("Motor 4 Speed", 0)))
-      )
+    m_intake.setDefaultCommand(
+      new RunCommand(() -> m_intake.stop(), m_intake)
     );
-    m_driverController.x().whileFalse(
-      new ParallelCommandGroup(
-        new RunCommand(() -> Motor1.set(0.)),
-        new RunCommand(() -> Motor2.set(0.)),
-        new RunCommand(() -> Motor3.set(0.)),
-        new RunCommand(() -> Motor4.set(0.))
-      )
+    // m_driverController.x().whileTrue(
+    //   new RunCommand(() -> m_exampleSubsystem.setWheelRPM(-controller.getP(), -controller.getI(), -controller.getD(), -controller2.getP()))
+    // );
+    // m_driverController.x().whileFalse(
+    //   new RunCommand(() -> m_exampleSubsystem.stop())
+    // );
+
+    m_driverController.y().whileTrue(
+      new RunCommand(() -> m_intake.runPivotMotor(0.1), m_intake)
+    );
+    m_driverController.a().whileTrue(
+      new RunCommand(() -> m_intake.runPivotMotor(-0.1), m_intake)
+    );
+    m_driverController.b().whileTrue(
+      new RunCommand(() -> m_intake.runIntake(0.5), m_intake)
+    );
+    m_driverController.b().whileTrue(
+      new RunCommand(() -> m_intake.runPivotToSetpoint(0))
     );
   }
 
@@ -88,7 +92,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return Commands.none();
   }
   
+  public void periodic() {
+  }
 }
